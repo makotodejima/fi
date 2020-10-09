@@ -94,6 +94,7 @@ dependencies = [
 name = "diesel_demo"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "diesel",
  "dotenv",
  "reqwest",
