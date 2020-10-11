@@ -10,17 +10,18 @@ use diesel::prelude::*;
 use diesel::PgConnection;
 use models::{Account, NewSnapshot, Snapshot};
 use std::collections::HashMap;
+
 use std::io::{stdin, Read};
 
-pub struct DieselDemo {
+pub struct DieselConn {
     database_connection: PgConnection,
 }
 
-impl DieselDemo {
-    pub fn new(database_url: String) -> DieselDemo {
+impl DieselConn {
+    pub fn new(database_url: String) -> Self {
         let database_connection =
             PgConnection::establish(&database_url).expect("Error connecting to the database");
-        DieselDemo {
+        Self {
             database_connection,
         }
     }

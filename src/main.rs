@@ -3,7 +3,7 @@ extern crate dotenv;
 extern crate reqwest;
 extern crate serde_json;
 
-use diesel_demo::DieselDemo;
+use diesel_demo::DieselConn;
 use dotenv::dotenv;
 use serde_json::value::Value;
 use std::collections::HashMap;
@@ -13,15 +13,16 @@ use std::env;
 fn main() -> Result<(), reqwest::Error> {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Error loading database url");
-    let demo_db = DieselDemo::new(database_url);
-    let notion_api_url = env::var("NOTION_API_URL").expect("Error loading notion api url");
+    let diesel_conn = DieselConn::new(database_url);
+    // TODO: get currency with read_line
+    let notion_api_url = get_notion_api_url("eur");
     let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
 
     let notion_table: Vec<Value>;
     if let Value::Array(vec) = res {
         notion_table = vec;
     } else {
-        panic!("Error: Received non vector response");
+        panic!("Error: Received non vector response from Notion");
     };
 
     for notion_row in notion_table {
@@ -58,7 +59,7 @@ fn main() -> Result<(), reqwest::Error> {
                 }
             }
 
-            let result = demo_db.add_new_account(
+            let result = diesel_conn.add_new_account(
                 account_id.to_owned(),
                 account_name.to_owned(),
                 account_currency,
@@ -73,11 +74,20 @@ fn main() -> Result<(), reqwest::Error> {
                 ),
             }
 
-            demo_db.update_snapshots(account_id.to_owned(), amounts_by_date)
+            diesel_conn.update_snapshots(account_id.to_owned(), amounts_by_date)
         } else {
             println!("Failed to find rows.");
         }
     }
-    demo_db.run();
+    diesel_conn.run();
     Ok(())
+}
+
+pub fn get_notion_api_url(currency_key: &str) -> String {
+    let mut key = String::from("NOTION_API_URL_");
+    key.push_str(currency_key.to_uppercase().as_str());
+    match env::var(key) {
+        Ok(url) => url,
+        Err(err) => panic!("Failed to get notion api url. Error: {}", err),
+    }
 }

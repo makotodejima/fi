@@ -25,21 +25,3 @@ pub struct NewSnapshot {
     pub date: NaiveDate,
     pub amount: i32,
 }
-
-// #[derive(Insertable)]
-// #[table_name = "accounts"]
-// pub struct NewAccount {
-//     pub name: String,
-//     pub currency: String,
-//     pub description: String,
-// }
-
-// impl NewAccount {
-//     pub fn new(name: String, currency: String, description: String) -> Self {
-//         Self {
-//             name,
-//             currency,
-//             description,
-//         }
-//     }
-// }
