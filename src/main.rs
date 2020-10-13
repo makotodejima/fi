@@ -9,13 +9,19 @@ use serde_json::value::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::env;
+use structopt::StructOpt;
+
+#[derive(StructOpt, Debug)]
+struct Cli {
+    currency: String,
+}
 
 fn main() -> Result<(), reqwest::Error> {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Error loading database url");
     let diesel_conn = DieselConn::new(database_url);
-    // TODO: get currency with read_line
-    let notion_api_url = get_notion_api_url("eur");
+    let args = Cli::from_args();
+    let notion_api_url = get_notion_api_url(&args.currency);
     let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
 
     let notion_table: Vec<Value>;
