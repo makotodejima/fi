@@ -13,6 +13,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 struct Cli {
+    /// Currency to sync
     currency: String,
 }
 
@@ -30,6 +31,8 @@ fn main() -> Result<(), reqwest::Error> {
     } else {
         panic!("Error: Received non vector response from Notion");
     };
+
+    diesel_conn.display_month_sum(&args.currency.to_uppercase());
 
     for notion_row in notion_table {
         if let Value::Object(row) = notion_row {

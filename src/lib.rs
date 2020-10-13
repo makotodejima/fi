@@ -5,6 +5,9 @@ mod models;
 mod schema;
 
 use chrono::NaiveDate;
+
+use crate::schema::*;
+use diesel::dsl::*;
 use diesel::pg::upsert::on_constraint;
 use diesel::prelude::*;
 use diesel::PgConnection;
@@ -12,6 +15,12 @@ use models::{Account, NewSnapshot, Snapshot};
 use std::collections::HashMap;
 
 use std::io::{stdin, Read};
+
+enum Currency {
+    EUR,
+    JPY,
+    USD,
+}
 
 pub struct DieselConn {
     database_connection: PgConnection,
@@ -32,6 +41,22 @@ impl DieselConn {
         // TODO: subcommand to add
         // self.add_new_account();
         // self.create_new_snapshot();
+    }
+
+    pub fn display_month_sum(&self, currency: &str) {
+        let test: Vec<(Snapshot, Account)> = snapshots::table
+            .inner_join(accounts::table)
+            .filter(accounts::currency.eq(currency))
+            .filter(snapshots::date.gt(date(now - 30.days())))
+            .load(&self.database_connection)
+            .expect("Error loading vector");
+
+        for (snapshot, account) in test {
+            println!(
+                "{} - {}, Name: {} Currency: {} account_id: {}",
+                snapshot.date, account.name, snapshot.amount, account.currency, account.id
+            );
+        }
     }
 
     fn display_accounts(&self) {
