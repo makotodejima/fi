@@ -1,10 +1,10 @@
-extern crate diesel_demo;
 extern crate dotenv;
+extern crate fi;
 extern crate reqwest;
 extern crate serde_json;
 
-use diesel_demo::DieselConn;
 use dotenv::dotenv;
+use fi::DieselConn;
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
