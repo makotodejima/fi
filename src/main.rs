@@ -68,27 +68,27 @@ fn main() -> Result<(), reqwest::Error> {
                 }
             }
 
-            let result = diesel_conn.add_new_account(
-                account_id.to_owned(),
-                account_name.to_owned(),
-                account_currency,
-                account_type,
-            );
+        // let result = diesel_conn.add_new_account(
+        //     account_id.to_owned(),
+        //     account_name.to_owned(),
+        //     account_currency,
+        //     account_type,
+        // );
 
-            match result {
-                Ok(new_account) => println!("Added new accounts: {}", new_account.name),
-                Err(err) => println!(
-                    "Failed to insert '{}'. Maybe already there? Error: {}",
-                    account_name, err
-                ),
-            }
+        // match result {
+        //     Ok(new_account) => println!("Added new accounts: {}", new_account.name),
+        //     Err(err) => println!(
+        //         "Failed to insert '{}'. Maybe already there? Error: {}",
+        //         account_name, err
+        //     ),
+        // }
 
-            diesel_conn.update_snapshots(account_id.to_owned(), amounts_by_date)
+        // diesel_conn.update_snapshots(account_id.to_owned(), amounts_by_date)
         } else {
             println!("Failed to find rows.");
         }
     }
-    diesel_conn.run();
+    // diesel_conn.run();
     Ok(())
 }
 

@@ -14,8 +14,6 @@ use diesel::PgConnection;
 use models::{Account, NewSnapshot, Snapshot};
 use std::collections::HashMap;
 
-use std::io::{stdin, Read};
-
 enum Currency {
     EUR,
     JPY,
@@ -51,12 +49,16 @@ impl DieselConn {
             .load(&self.database_connection)
             .expect("Error loading vector");
 
+        let mut sum = 0;
         for (snapshot, account) in test {
             println!(
-                "{} - {}, Name: {} Currency: {} account_id: {}",
+                "{}: {} -> {} {} ({})",
                 snapshot.date, account.name, snapshot.amount, account.currency, account.id
             );
+            sum += snapshot.amount;
         }
+        println!("---");
+        println!("Total: {}", sum);
     }
 
     fn display_accounts(&self) {
