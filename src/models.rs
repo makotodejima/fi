@@ -1,4 +1,5 @@
 use super::schema::{accounts, snapshots};
+use diesel::sql_types::{BigInt, Date, Integer};
 
 use chrono::NaiveDate;
 

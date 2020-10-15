@@ -32,7 +32,9 @@ fn main() -> Result<(), reqwest::Error> {
         panic!("Error: Received non vector response from Notion");
     };
 
-    diesel_conn.display_month_sum(&args.currency.to_uppercase());
+    // diesel_conn.display_month_sum(&args.currency.to_uppercase());
+    // diesel_conn.display_latest_sum(&args.currency.to_uppercase());
+    diesel_conn.display_timeline(&args.currency.to_uppercase());
 
     for notion_row in notion_table {
         if let Value::Object(row) = notion_row {

@@ -4,14 +4,14 @@ extern crate diesel;
 mod models;
 mod schema;
 
-use chrono::NaiveDate;
-
 use crate::schema::*;
+use chrono::NaiveDate;
 use diesel::dsl::*;
 use diesel::pg::upsert::on_constraint;
 use diesel::prelude::*;
 use diesel::PgConnection;
 use models::{Account, NewSnapshot, Snapshot};
+
 use std::collections::HashMap;
 
 enum Currency {
@@ -61,6 +61,42 @@ impl DieselConn {
         println!("Total: {}", sum);
     }
 
+    pub fn display_latest_sum(&self, currency: &str) {
+        let table: Vec<(Snapshot, Account)> = snapshots::table
+            .distinct_on(snapshots::account_id)
+            .inner_join(accounts::table)
+            .filter(accounts::currency.eq(currency))
+            .order((snapshots::account_id, snapshots::date.desc()))
+            .load(&self.database_connection)
+            .expect("Error loading latest sum");
+
+        let mut sum = 0;
+        for (snapshot, account) in table {
+            println!(
+                "{}: {} -> {} {} ({})",
+                snapshot.date, account.name, snapshot.amount, account.currency, account.id
+            );
+            sum += snapshot.amount;
+        }
+        println!("---");
+        println!("Total: {}", sum);
+    }
+
+    pub fn display_timeline(&self, currency: &str) {
+        let table: Vec<(NaiveDate, Option<i64>)> = snapshots::table
+            .inner_join(accounts::table)
+            .select((snapshots::date, sql("sum(amount)")))
+            .filter(accounts::currency.eq(currency))
+            .group_by(snapshots::date)
+            .order(snapshots::date.asc())
+            .load(&self.database_connection)
+            .expect("Error loading table");
+
+        for (date, sum) in table {
+            println!("{}: {}", date, sum.unwrap())
+        }
+    }
+
     fn display_accounts(&self) {
         use schema::accounts::dsl::*;
 
@@ -103,7 +139,6 @@ impl DieselConn {
         currency: String,
         description: String,
     ) -> Result<Account, diesel::result::Error> {
-        use schema::accounts;
         use schema::accounts::id as id_column;
 
         println!("Creating new account...");
@@ -123,8 +158,6 @@ impl DieselConn {
     }
 
     pub fn create_new_snapshot(&self, account_id: String, ymd_string: String, amount: i32) {
-        use schema::snapshots;
-
         println!("Creating new snapshot...");
 
         let new_snapshot = NewSnapshot {
