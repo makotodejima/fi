@@ -50,11 +50,10 @@ impl DieselConn {
             .expect("Error loading vector");
 
         let mut sum = 0;
+        println!("{}", currency);
+        println!("---");
         for (snapshot, account) in test {
-            println!(
-                "{}: {} -> {} {} ({})",
-                snapshot.date, account.name, snapshot.amount, account.currency, account.id
-            );
+            println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
             sum += snapshot.amount;
         }
         println!("---");
@@ -71,11 +70,10 @@ impl DieselConn {
             .expect("Error loading latest sum");
 
         let mut sum = 0;
+        println!("{} - latest", currency);
+        println!("---");
         for (snapshot, account) in table {
-            println!(
-                "{}: {} -> {} {} ({})",
-                snapshot.date, account.name, snapshot.amount, account.currency, account.id
-            );
+            println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
             sum += snapshot.amount;
         }
         println!("---");
@@ -92,8 +90,22 @@ impl DieselConn {
             .load(&self.database_connection)
             .expect("Error loading table");
 
+        println!("{}", currency);
+        println!("---");
+        let mut prev: Option<i64> = None;
         for (date, sum) in table {
-            println!("{}: {}", date, sum.unwrap())
+            if let Some(prev_sum) = prev {
+                let growth = sum.unwrap() as f64 / prev_sum as f64;
+                println!(
+                    "{}: {} | {:.2}%",
+                    date,
+                    sum.unwrap(),
+                    growth * f64::from(100)
+                );
+            } else {
+                println!("{}: {}", date, sum.unwrap());
+            }
+            prev = Some(sum.unwrap());
         }
     }
 
