@@ -11,6 +11,7 @@ use diesel::pg::upsert::on_constraint;
 use diesel::prelude::*;
 use diesel::PgConnection;
 use models::{Account, NewSnapshot, Snapshot};
+use termion::{color, style};
 
 use std::collections::HashMap;
 
@@ -92,15 +93,18 @@ impl DieselConn {
 
         println!("{}", currency);
         println!("---");
+
         let mut prev: Option<i64> = None;
         for (date, sum) in table {
             if let Some(prev_sum) = prev {
                 let growth = sum.unwrap() as f64 / prev_sum as f64;
                 println!(
-                    "{}: {} | {:.2}%",
+                    "{}: {} {} {:.2}%{}",
                     date,
                     sum.unwrap(),
-                    growth * f64::from(100)
+                    color::Fg(color::Cyan),
+                    growth * f64::from(100),
+                    color::Fg(color::Reset)
                 );
             } else {
                 println!("{}: {}", date, sum.unwrap());
