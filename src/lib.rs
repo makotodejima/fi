@@ -5,18 +5,17 @@ pub mod account;
 pub mod cli;
 pub mod models;
 pub mod schema;
+pub mod snapshot;
 
 use chrono::NaiveDate;
 use diesel::dsl::*;
-use diesel::pg::upsert::on_constraint;
 use diesel::prelude::*;
 use diesel::PgConnection;
-use models::{Account, NewSnapshot, Snapshot};
+use models::Account;
 use schema::snapshots;
 use schema::*;
+use snapshot::Snapshot;
 use termion::color;
-
-use std::collections::HashMap;
 
 // enum Currency {
 //     EUR,
@@ -192,41 +191,5 @@ impl DieselConn {
             .on_conflict(id_column)
             .do_nothing()
             .get_result::<Account>(&self.database_connection)
-    }
-
-    pub fn create_new_snapshot(&self, account_id: String, ymd_string: String, amount: i32) {
-        println!("Creating new snapshot...");
-
-        let new_snapshot = NewSnapshot {
-            account_id,
-            amount,
-            date: ymd_string
-                .parse::<NaiveDate>()
-                .expect("Error: Failed to parse date string"),
-        };
-
-        if let Err(err) = diesel::insert_into(snapshots::table)
-            .values(&new_snapshot)
-            .on_conflict(on_constraint("snapshot_unique"))
-            .do_nothing()
-            .get_result::<Snapshot>(&self.database_connection)
-        {
-            println!(
-                "Skipping inserting snapshot with id '{}', date '{}'.\nMaybe already there? Error: {}",
-                new_snapshot.account_id,
-                new_snapshot.date,
-                err
-            );
-        }
-    }
-
-    pub fn update_snapshots(&self, account_id: String, amounts_by_date: HashMap<String, i32>) {
-        println!(
-            "Updating snapshots for {} with notion's table data...",
-            &account_id
-        );
-        for (date, amount) in amounts_by_date {
-            self.create_new_snapshot(account_id.to_owned(), date, amount);
-        }
     }
 }

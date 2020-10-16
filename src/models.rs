@@ -1,5 +1,4 @@
 use crate::schema::*;
-use chrono::NaiveDate;
 
 #[derive(Queryable, Insertable)]
 pub struct Account {
@@ -7,20 +6,4 @@ pub struct Account {
     pub name: String,
     pub currency: String,
     pub description: String,
-}
-
-#[derive(Queryable)]
-pub struct Snapshot {
-    pub id: i32,
-    pub account_id: String,
-    pub date: NaiveDate,
-    pub amount: i32,
-}
-
-#[derive(Insertable)]
-#[table_name = "snapshots"]
-pub struct NewSnapshot {
-    pub account_id: String,
-    pub date: NaiveDate,
-    pub amount: i32,
 }

@@ -1,4 +1,4 @@
-use crate::DieselConn;
+use crate::{DieselConn, Snapshot};
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -60,7 +60,11 @@ pub fn sync(conn: &DieselConn, res: Value) {
                 ),
             }
 
-            conn.update_snapshots(account_id.to_owned(), amounts_by_date)
+            Snapshot::update_snapshots(
+                &conn.database_connection,
+                account_id.to_owned(),
+                amounts_by_date,
+            );
         } else {
             panic!("Failed to find rows in notion_table");
         }
