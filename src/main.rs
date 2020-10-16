@@ -1,30 +1,30 @@
 use dotenv::dotenv;
 use fi::account::sync;
+use fi::cli::Cli;
 use fi::DieselConn;
 use reqwest;
 use serde_json::value::Value;
 use std::env;
 use structopt::StructOpt;
 
-#[derive(StructOpt, Debug)]
-struct Cli {
-    /// Currency to sync
-    currency: String,
-}
-
 fn main() -> Result<(), reqwest::Error> {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Error loading database url");
     let diesel_conn = DieselConn::new(database_url);
     let args = Cli::from_args();
-    let notion_api_url = get_notion_api_url(&args.currency);
-    let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
-    sync(&diesel_conn, res);
-
-    // diesel_conn.display_month_sum(&args.currency.to_uppercase());
-    // diesel_conn.display_latest_sum(&args.currency.to_uppercase());
-    // diesel_conn.display_timeline(&args.currency.to_uppercase());
-
+    match args {
+        Cli::Pull { currency } => {
+            let notion_api_url = get_notion_api_url(&currency);
+            let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
+            sync(&diesel_conn, res);
+        }
+        Cli::History { currency } => {
+            diesel_conn.display_history(&currency);
+        }
+        Cli::Sum { currency } => {
+            diesel_conn.display_latest_sum(&currency);
+        }
+    }
     // diesel_conn.run();
     Ok(())
 }

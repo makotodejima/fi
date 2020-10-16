@@ -2,6 +2,7 @@
 extern crate diesel;
 
 pub mod account;
+pub mod cli;
 pub mod models;
 pub mod schema;
 
@@ -17,11 +18,11 @@ use termion::color;
 
 use std::collections::HashMap;
 
-enum Currency {
-    EUR,
-    JPY,
-    USD,
-}
+// enum Currency {
+//     EUR,
+//     JPY,
+//     USD,
+// }
 
 pub struct DieselConn {
     database_connection: PgConnection,
@@ -64,16 +65,17 @@ impl DieselConn {
     }
 
     pub fn display_latest_sum(&self, currency: &str) {
+        let given_currency = currency.to_uppercase();
         let table: Vec<(Snapshot, Account)> = snapshots::table
             .distinct_on(snapshots::account_id)
             .inner_join(accounts::table)
-            .filter(accounts::currency.eq(currency))
+            .filter(accounts::currency.eq(&given_currency))
             .order((snapshots::account_id, snapshots::date.desc()))
             .load(&self.database_connection)
             .expect("Error loading latest sum");
 
         let mut sum = 0;
-        println!("{} - latest", currency);
+        println!("{} - latest", given_currency);
         println!("---");
         for (snapshot, account) in table {
             println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
@@ -83,32 +85,49 @@ impl DieselConn {
         println!("Total: {}", sum);
     }
 
-    pub fn display_timeline(&self, currency: &str) {
+    pub fn display_history(&self, currency: &str) {
+        let given_currency = currency.to_uppercase();
         let table: Vec<(NaiveDate, Option<i64>)> = snapshots::table
             .inner_join(accounts::table)
             .select((snapshots::date, sql("sum(amount)")))
-            .filter(accounts::currency.eq(currency))
+            .filter(accounts::currency.eq(&given_currency))
             .group_by(snapshots::date)
             .order(snapshots::date.asc())
             .load(&self.database_connection)
             .expect("Error loading table");
 
-        println!("{} - timeline", currency);
+        println!("{} - history", given_currency);
         println!("---");
 
         let mut prev: Option<i64> = None;
         for (date, sum) in table {
             if let Some(prev_sum) = prev {
-                let growth = sum.unwrap() as f64 / prev_sum as f64;
-                println!(
-                    "{}: {} {} {:.2}%{}",
-                    date,
-                    sum.unwrap(),
-                    color::Fg(color::Cyan),
-                    growth * f64::from(100),
-                    color::Fg(color::Reset)
-                );
+                let is_going_well = sum.unwrap() as f64 >= prev_sum as f64;
+                let diff = sum.unwrap() as f64 - prev_sum as f64;
+                let diff_percent = sum.unwrap() as f64 / prev_sum as f64;
+                if is_going_well {
+                    println!(
+                        "{}: {} {} +{} / {:.2}%{}",
+                        date,
+                        sum.unwrap(),
+                        color::Fg(color::Cyan),
+                        diff,
+                        diff_percent * f64::from(100),
+                        color::Fg(color::Reset)
+                    );
+                } else {
+                    println!(
+                        "{}: {} {} {} / {:.2}%{}",
+                        date,
+                        sum.unwrap(),
+                        color::Fg(color::Red),
+                        diff,
+                        diff_percent * f64::from(100),
+                        color::Fg(color::Reset)
+                    );
+                }
             } else {
+                // First row of record without prev value
                 println!("{}: {}", date, sum.unwrap());
             }
             prev = Some(sum.unwrap());
@@ -193,7 +212,9 @@ impl DieselConn {
             .get_result::<Snapshot>(&self.database_connection)
         {
             println!(
-                "Failed to insert snapshot. Maybe already there? Error: {}",
+                "Skipping inserting snapshot with id '{}', date '{}'.\nMaybe already there? Error: {}",
+                new_snapshot.account_id,
+                new_snapshot.date,
                 err
             );
         }
