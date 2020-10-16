@@ -14,6 +14,7 @@ use diesel::PgConnection;
 use schema::*;
 use snapshot::Snapshot;
 use termion::color;
+use textplots::{Chart, Plot, Shape};
 
 // enum Currency {
 //     EUR,
@@ -93,11 +94,11 @@ impl DieselConn {
             .load(&self.database_connection)
             .expect("Error loading table");
 
-        println!("{} - history", given_currency);
+        println!("\n{} - history", given_currency);
         println!("---");
 
         let mut prev: Option<i64> = None;
-        for (date, sum) in table {
+        for (date, sum) in &table {
             if let Some(prev_sum) = prev {
                 let is_going_well = sum.unwrap() as f64 >= prev_sum as f64;
                 let diff = sum.unwrap() as f64 - prev_sum as f64;
@@ -129,6 +130,18 @@ impl DieselConn {
             }
             prev = Some(sum.unwrap());
         }
+
+        let points: Vec<(f32, f32)> = table
+            .to_owned()
+            .into_iter()
+            .enumerate()
+            .map(|(idx, (_, sum))| (idx as f32, sum.unwrap() as f32))
+            .collect();
+
+        Chart::new(100, 40, 0.0, *&table.len() as f32 - 1.0)
+            .lineplot(&Shape::Lines(&points))
+            .nice();
+        println!("\n");
     }
 
     fn display_accounts(&self) {
