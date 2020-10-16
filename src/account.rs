@@ -1,7 +1,16 @@
+use crate::schema::*;
 use crate::{DieselConn, Snapshot};
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+
+#[derive(Queryable, Insertable)]
+pub struct Account {
+    pub id: String,
+    pub name: String,
+    pub currency: String,
+    pub description: String,
+}
 
 pub fn sync(conn: &DieselConn, res: Value) {
     let notion_table: Vec<Value>;

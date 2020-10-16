@@ -3,16 +3,14 @@ extern crate diesel;
 
 pub mod account;
 pub mod cli;
-pub mod models;
 pub mod schema;
 pub mod snapshot;
 
+use account::Account;
 use chrono::NaiveDate;
 use diesel::dsl::*;
 use diesel::prelude::*;
 use diesel::PgConnection;
-use models::Account;
-use schema::snapshots;
 use schema::*;
 use snapshot::Snapshot;
 use termion::color;
