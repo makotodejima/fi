@@ -1,6 +1,4 @@
-use super::schema::{accounts, snapshots};
-use diesel::sql_types::{BigInt, Date, Integer};
-
+use crate::schema::*;
 use chrono::NaiveDate;
 
 #[derive(Queryable, Insertable)]

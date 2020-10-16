@@ -1,17 +1,19 @@
 #[macro_use]
 extern crate diesel;
 
-mod models;
-mod schema;
+pub mod account;
+pub mod models;
+pub mod schema;
 
-use crate::schema::*;
 use chrono::NaiveDate;
 use diesel::dsl::*;
 use diesel::pg::upsert::on_constraint;
 use diesel::prelude::*;
 use diesel::PgConnection;
 use models::{Account, NewSnapshot, Snapshot};
-use termion::{color, style};
+use schema::snapshots;
+use schema::*;
+use termion::color;
 
 use std::collections::HashMap;
 
@@ -91,7 +93,7 @@ impl DieselConn {
             .load(&self.database_connection)
             .expect("Error loading table");
 
-        println!("{}", currency);
+        println!("{} - timeline", currency);
         println!("---");
 
         let mut prev: Option<i64> = None;
