@@ -118,3 +118,8 @@ fn display_accounts(conn: &PgConnection) {
         println!("---");
     }
 }
+
+pub fn delete_accounts(conn: &PgConnection) {
+    use diesel::delete;
+    delete(accounts::table).execute(conn);
+}

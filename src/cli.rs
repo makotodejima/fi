@@ -20,17 +20,21 @@ pub enum Cli {
         #[structopt(short = "c")]
         currency: String,
     },
-    /// Display sum
+    /// Display latest sum for given currency
     #[structopt(name = "sum")]
     Sum {
         /// Currency to display sum
         #[structopt(short = "c")]
         currency: String,
     },
+    /// Display net worth in given currency
     #[structopt(name = "networth")]
     NetWorth {
         /// Currency to display total in
         #[structopt(short = "c")]
         currency: String,
     },
+    /// Delete all data
+    #[structopt(name = "delete")]
+    Delete,
 }

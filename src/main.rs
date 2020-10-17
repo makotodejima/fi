@@ -3,7 +3,7 @@ use dotenv::dotenv;
 use fi::account::sync;
 use fi::cli::Cli;
 use fi::currency::Currency;
-use fi::{display_history, display_latest_sum, display_net_worth};
+use fi::{delete_data, display_history, display_latest_sum, display_net_worth};
 use reqwest;
 use serde_json::value::Value;
 use std::env;
@@ -39,6 +39,9 @@ fn run(database_url: &str, command: Cli) -> Result<(), Box<dyn Error>> {
         Cli::NetWorth { currency } => {
             let given_currency = Currency::from_str(&currency);
             display_net_worth(&conn, &given_currency);
+        }
+        Cli::Delete => {
+            delete_data(&conn);
         }
     }
     Ok(())

@@ -81,3 +81,8 @@ fn display_snapshots(conn: &PgConnection) {
         println!("---");
     }
 }
+
+pub fn delete_snapshots(conn: &PgConnection) {
+    use diesel::delete;
+    delete(snapshots::table).execute(conn);
+}
