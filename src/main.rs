@@ -7,12 +7,7 @@ use serde_json::value::Value;
 use std::env;
 use structopt::StructOpt;
 
-use textplots::{utils, Chart, Plot, Shape};
-
 fn main() -> Result<(), reqwest::Error> {
-    // let points = vec![(1.0, -1.0), (2.0, 0.0), (4.0, 1.0)];
-    // Chart::default().lineplot(&Shape::Lines(&points)).display();
-
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Error loading database url");
     let diesel_conn = DieselConn::new(database_url);
