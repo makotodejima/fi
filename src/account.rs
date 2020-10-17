@@ -1,5 +1,7 @@
 use crate::schema::*;
-use crate::{DieselConn, Snapshot};
+use crate::Snapshot;
+use diesel::prelude::*;
+use diesel::PgConnection;
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -12,7 +14,7 @@ pub struct Account {
     pub description: String,
 }
 
-pub fn sync(conn: &DieselConn, res: Value) {
+pub fn sync(conn: &PgConnection, res: Value) {
     let notion_table: Vec<Value>;
     if let Value::Array(vec) = res {
         notion_table = vec;
@@ -54,7 +56,8 @@ pub fn sync(conn: &DieselConn, res: Value) {
                 }
             }
 
-            let result = conn.add_new_account(
+            let result = add_new_account(
+                conn,
                 account_id.to_owned(),
                 account_name.to_owned(),
                 account_currency,
@@ -69,13 +72,49 @@ pub fn sync(conn: &DieselConn, res: Value) {
                 ),
             }
 
-            Snapshot::update_snapshots(
-                &conn.database_connection,
-                account_id.to_owned(),
-                amounts_by_date,
-            );
+            Snapshot::update_snapshots(&conn, account_id.to_owned(), amounts_by_date);
         } else {
             panic!("Failed to find rows in notion_table");
         }
+    }
+}
+
+pub fn add_new_account(
+    conn: &PgConnection,
+    id: String,
+    name: String,
+    currency: String,
+    description: String,
+) -> Result<Account, diesel::result::Error> {
+    use accounts::id as id_column;
+
+    println!("Creating new account...");
+
+    let new_account = Account {
+        id,
+        name,
+        currency,
+        description,
+    };
+
+    diesel::insert_into(accounts::table)
+        .values(&new_account)
+        .on_conflict(id_column)
+        .do_nothing()
+        .get_result::<Account>(conn)
+}
+
+fn display_accounts(conn: &PgConnection) {
+    let all_accounts = accounts::table
+        .load::<Account>(conn)
+        .expect("Error getting accounts");
+    println!("\n *Displaying all accounts");
+    println!("---");
+
+    for account in all_accounts {
+        println!("Name: {}", account.name);
+        println!("Currency: {}", account.currency);
+        println!("Description: {}", account.description);
+        println!("---");
     }
 }
