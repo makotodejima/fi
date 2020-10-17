@@ -24,8 +24,10 @@ fn main() -> Result<(), reqwest::Error> {
         Cli::Sum { currency } => {
             diesel_conn.display_latest_sum(&currency);
         }
+        Cli::NetWorth { currency } => {
+            diesel_conn.display_net_worth(&currency);
+        }
     }
-    // diesel_conn.run();
     Ok(())
 }
 

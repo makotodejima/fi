@@ -27,4 +27,10 @@ pub enum Cli {
         #[structopt(short = "c")]
         currency: String,
     },
+    #[structopt(name = "networth")]
+    NetWorth {
+        /// Currency to display total in
+        #[structopt(short = "c")]
+        currency: String,
+    },
 }

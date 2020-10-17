@@ -11,7 +11,9 @@ use chrono::NaiveDate;
 use diesel::dsl::*;
 use diesel::prelude::*;
 use diesel::PgConnection;
+use reqwest;
 use schema::*;
+use serde_json::value::Value;
 use snapshot::Snapshot;
 use termion::color;
 use textplots::{Chart, Plot, Shape};
@@ -39,28 +41,26 @@ impl DieselConn {
         self.display_accounts();
         self.display_snapshots();
         // TODO: subcommand to add
-        // self.add_new_account();
-        // self.create_new_snapshot();
     }
 
-    pub fn display_month_sum(&self, currency: &str) {
-        let test: Vec<(Snapshot, Account)> = snapshots::table
-            .inner_join(accounts::table)
-            .filter(accounts::currency.eq(currency))
-            .filter(snapshots::date.gt(date(now - 30.days())))
-            .load(&self.database_connection)
-            .expect("Error loading vector");
+    // pub fn display_month_sum(&self, currency: &str) {
+    //     let test: Vec<(Snapshot, Account)> = snapshots::table
+    //         .inner_join(accounts::table)
+    //         .filter(accounts::currency.eq(currency))
+    //         .filter(snapshots::date.gt(date(now - 30.days())))
+    //         .load(&self.database_connection)
+    //         .expect("Error loading vector");
 
-        let mut sum = 0;
-        println!("{}", currency);
-        println!("---");
-        for (snapshot, account) in test {
-            println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
-            sum += snapshot.amount;
-        }
-        println!("---");
-        println!("Total: {}", sum);
-    }
+    //     let mut sum = 0;
+    //     println!("{}", currency);
+    //     println!("---");
+    //     for (snapshot, account) in test {
+    //         println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
+    //         sum += snapshot.amount;
+    //     }
+    //     println!("---");
+    //     println!("Total: {}", sum);
+    // }
 
     pub fn display_latest_sum(&self, currency: &str) {
         let given_currency = currency.to_uppercase();
@@ -79,6 +79,82 @@ impl DieselConn {
             println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
             sum += snapshot.amount;
         }
+        println!("---");
+        println!("Total: {}", sum);
+    }
+
+    pub fn display_net_worth(&self, currency: &str) {
+        let given_currency = currency.to_uppercase();
+        let res = reqwest::blocking::get(
+            "https://api.exchangeratesapi.io/latest?base=JPY&symbols=EUR,USD",
+        );
+        let mut eur_rate: Option<f64> = None;
+        let mut usd_rate: Option<f64> = None;
+        match res {
+            Ok(success) => {
+                let json = success.json::<Value>();
+                if let Ok(rates) = json {
+                    if let Value::Number(rate) = &rates["rates"]["EUR"] {
+                        eur_rate = rate.as_f64();
+                    }
+                    if let Value::Number(rate) = &rates["rates"]["USD"] {
+                        usd_rate = rate.as_f64();
+                    }
+                }
+            }
+            Err(err) => panic!(err),
+        }
+
+        let join = snapshots::table
+            .distinct_on(snapshots::account_id)
+            .inner_join(accounts::table)
+            .order((snapshots::account_id, snapshots::date.desc()));
+
+        let jpy_table: Vec<(Snapshot, Account)> = join
+            .filter(accounts::currency.eq("JPY"))
+            .load(&self.database_connection)
+            .expect("Error loading latest sum JPY");
+
+        let mut sum = 0;
+        println!("Net worth in {}\n===", given_currency);
+        println!("JPY accounts");
+        for (snapshot, account) in jpy_table {
+            println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
+            sum += snapshot.amount;
+        }
+
+        if let Some(rate) = eur_rate {
+            let eur_table: Vec<(Snapshot, Account)> = join
+                .filter(accounts::currency.eq("EUR"))
+                .load(&self.database_connection)
+                .expect("Error loading latest sum EUR");
+
+            println!("---\nEUR accounts");
+            for (snapshot, account) in eur_table {
+                let amount_in_jpy = snapshot.amount as f64 / rate;
+                println!("{}: {} {:.0}", snapshot.date, account.name, amount_in_jpy);
+                sum += amount_in_jpy as i32;
+            }
+        }
+
+        if let Some(rate) = usd_rate {
+            let usd_table: Vec<(Snapshot, Account)> = join
+                .filter(accounts::currency.eq("USD"))
+                .load(&self.database_connection)
+                .expect("Error loading latest sum USD");
+            println!("---\nUSD accounts");
+            for (snapshot, account) in usd_table {
+                let amount_in_jpy = snapshot.amount as f64 / rate;
+                println!(
+                    "{}: {} {:.0}",
+                    snapshot.date,
+                    account.name,
+                    snapshot.amount as f64 / rate
+                );
+                sum += amount_in_jpy as i32;
+            }
+        }
+
         println!("---");
         println!("Total: {}", sum);
     }
