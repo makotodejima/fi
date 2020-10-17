@@ -65,3 +65,19 @@ impl Snapshot {
         }
     }
 }
+
+fn display_snapshots(conn: &PgConnection) {
+    let all_snapshots = snapshots::table
+        .load::<Snapshot>(conn)
+        .expect("Error getting snapshots");
+    println!("\n *Displaying all snapshots");
+    println!("---");
+
+    for snapshot in all_snapshots {
+        println!("Id: {}", snapshot.id);
+        println!("Account: {}", snapshot.account_id);
+        println!("Date: {}", snapshot.date);
+        println!("Amount: {}", snapshot.amount);
+        println!("---");
+    }
+}
