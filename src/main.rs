@@ -1,41 +1,67 @@
+use diesel::prelude::*;
 use dotenv::dotenv;
 use fi::account::sync;
 use fi::cli::Cli;
-use fi::DieselConn;
+use fi::currency::Currency;
+use fi::{display_history, display_latest_sum, display_net_worth};
 use reqwest;
 use serde_json::value::Value;
 use std::env;
+use std::error::Error;
 use structopt::StructOpt;
 
-fn main() -> Result<(), reqwest::Error> {
+fn main() {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Error loading database url");
-    let diesel_conn = DieselConn::new(database_url);
+
     let args = Cli::from_args();
-    match args {
+
+    handle_error(run(&database_url.as_str(), args));
+}
+
+fn run(database_url: &str, command: Cli) -> Result<(), Box<dyn Error>> {
+    let conn = PgConnection::establish(&database_url).expect("Error connecting to the database");
+    match command {
         Cli::Pull { currency } => {
-            let notion_api_url = get_notion_api_url(&currency);
+            let given_currency = Currency::from_str(&currency);
+            let notion_api_url = get_notion_api_url(&given_currency);
             let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
-            sync(&diesel_conn, res);
+            sync(&conn, res);
         }
         Cli::History { currency } => {
-            diesel_conn.display_history(&currency);
+            let given_currency = Currency::from_str(&currency);
+            display_history(&conn, &given_currency);
         }
         Cli::Sum { currency } => {
-            diesel_conn.display_latest_sum(&currency);
+            let given_currency = Currency::from_str(&currency);
+            display_latest_sum(&conn, &given_currency);
         }
         Cli::NetWorth { currency } => {
-            diesel_conn.display_net_worth(&currency);
+            let given_currency = Currency::from_str(&currency);
+            display_net_worth(&conn, &given_currency);
         }
     }
     Ok(())
 }
 
-pub fn get_notion_api_url(currency_key: &str) -> String {
-    let mut key = String::from("NOTION_API_URL_");
-    key.push_str(currency_key.to_uppercase().as_str());
-    match env::var(key) {
+pub fn get_notion_api_url(currency: &Currency) -> String {
+    let mut notion_api_url = String::from("NOTION_API_URL_");
+    notion_api_url.push_str(currency.as_str());
+    match env::var(notion_api_url) {
         Ok(url) => url,
         Err(err) => panic!("Failed to get notion api url. Error: {}", err),
     }
+}
+
+fn handle_error<T>(res: Result<T, Box<dyn Error>>) -> T {
+    match res {
+        Ok(x) => x,
+        Err(e) => print_error_and_exit(&*e),
+    }
+}
+
+fn print_error_and_exit(err: &dyn Error) -> ! {
+    use std::process::exit;
+    eprintln!("An unexpected error occurred: {}", err);
+    exit(1);
 }
