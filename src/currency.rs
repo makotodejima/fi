@@ -21,9 +21,9 @@ impl Currency {
     }
     pub fn from_str(s: &str) -> Self {
         match s {
-            "eur" | "EUR" => Currency::EUR,
-            "jpy" | "JPY" => Currency::JPY,
-            "usd" | "USD" => Currency::USD,
+            "eu" | "eur" | "euro" | "EUR" => Currency::EUR,
+            "jp" | "jpy" | "yen" | "JPY" => Currency::JPY,
+            "us" | "usd" | "dollar" | "USD" => Currency::USD,
             _ => panic!("Invalid currency symbol given"),
         }
     }
