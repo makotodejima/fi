@@ -7,7 +7,7 @@ pub mod currency;
 pub mod schema;
 pub mod snapshot;
 
-use account::{delete_accounts, Account};
+use account::Account;
 use chrono::NaiveDate;
 use currency::Currency;
 use diesel::dsl::*;
@@ -16,7 +16,7 @@ use diesel::PgConnection;
 use reqwest;
 use schema::*;
 use serde_json::value::Value;
-use snapshot::{delete_snapshots, Snapshot};
+use snapshot::Snapshot;
 use termion::color;
 use textplots::{Chart, Plot, Shape};
 
@@ -173,6 +173,7 @@ fn display_latest_converted(
 }
 
 pub fn delete_data(conn: &PgConnection) {
-    delete_snapshots(conn);
-    delete_accounts(conn);
+    Snapshot::delete_snapshots(conn);
+    Account::delete_accounts(conn);
+    println!("Deleted all rows in tables");
 }
