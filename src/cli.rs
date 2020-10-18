@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-#[derive(StructOpt)]
+#[derive(StructOpt, Debug)]
 #[structopt(
     name = "fi",
     after_help = "You can also run `blog SUBCOMMAND -h` to get more information about that subcommand."
@@ -10,31 +10,31 @@ pub enum Cli {
     #[structopt(name = "pull")]
     Pull {
         /// Currency to pull data
-        #[structopt(short = "c")]
+        #[structopt(short, long, default_value = "all")]
         currency: String,
     },
     /// Display history of accounts
     #[structopt(name = "history")]
     History {
         /// Currency to show history
-        #[structopt(short = "c")]
+        #[structopt(short, long)]
         currency: String,
     },
     /// Display latest sum for given currency
     #[structopt(name = "sum")]
     Sum {
         /// Currency to display sum
-        #[structopt(short = "c")]
+        #[structopt(short, long)]
         currency: String,
     },
     /// Display net worth in given currency
     #[structopt(name = "networth")]
     NetWorth {
         /// Currency to display total in
-        #[structopt(short = "c")]
+        #[structopt(short, long)]
         currency: String,
     },
-    /// Delete all data
+    /// Delete all table rows
     #[structopt(name = "delete")]
     Delete,
 }
