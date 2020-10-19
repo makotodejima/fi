@@ -113,7 +113,7 @@ pub fn display_net_worth(conn: &PgConnection, currency: &Currency) {
 
     let mut sum = 0;
 
-    println!("Net worth in {}\n===", currency.as_str());
+    println!("\nNet worth in {}\n===", currency.as_str());
     println!("{} accounts", currency.as_str());
     for (snapshot, account) in base_currency_table {
         println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
@@ -133,8 +133,9 @@ pub fn display_net_worth(conn: &PgConnection, currency: &Currency) {
         Err(err) => panic!(err),
     }
 
-    println!("---");
+    println!("===");
     println!("Total: {} {}", sum, &currency.as_str());
+    println!("\n");
 }
 
 fn display_latest_converted(
