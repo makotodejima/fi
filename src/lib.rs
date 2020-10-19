@@ -134,7 +134,7 @@ pub fn display_net_worth(conn: &PgConnection, currency: &Currency) {
     }
 
     println!("---");
-    println!("Total: {}", sum);
+    println!("Total: {} {}", sum, &currency.as_str());
 }
 
 fn display_latest_converted(
@@ -153,12 +153,17 @@ fn display_latest_converted(
                 .load(conn)
                 .expect("Error loading latest converted sum");
 
-            println!(
-                "---\n{} accounts ({} {} = 1.00)",
-                currency.as_str(),
-                rate,
-                currency.as_str(),
-            );
+            if let Value::String(base) = &exchange_rate_json["base"] {
+                println!(
+                    "---\n{} accounts (1.00 {} = {} {})",
+                    currency.as_str(),
+                    base,
+                    rate,
+                    currency.as_str(),
+                );
+            } else {
+                panic!("Error resolving base currency");
+            }
 
             for (snapshot, account) in table {
                 let converted_amount = snapshot.amount as f64 / rate;
