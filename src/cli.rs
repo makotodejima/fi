@@ -3,7 +3,7 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "fi",
-    after_help = "You can also run `blog SUBCOMMAND -h` to get more information about that subcommand."
+    after_help = "You can also run `fi SUBCOMMAND -h` to get more information about that subcommand."
 )]
 pub enum Cli {
     /// Pull account and snapshot data from notion table
