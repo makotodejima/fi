@@ -30,14 +30,14 @@ pub fn display_latest_sum(conn: &PgConnection, currency: &Currency) {
         .expect("Error loading latest sum");
 
     let mut sum = 0;
-    println!("{} - latest", currency.as_str());
+    println!("\n{} - latest", currency.as_str());
     println!("---");
     for (snapshot, account) in table {
         println!("{}: {} {}", snapshot.date, account.name, snapshot.amount);
         sum += snapshot.amount;
     }
     println!("---");
-    println!("Total: {}", sum);
+    println!("Total: {}\n", sum);
 }
 
 pub fn display_history(conn: &PgConnection, currency: &Currency) {

@@ -67,7 +67,7 @@ fn sync_all(conn: &PgConnection) -> Result<(), Box<dyn Error>> {
         let res = reqwest::blocking::get(&notion_api_url)?.json::<Value>()?;
         Account::sync(&conn, res);
     }
-    println!("Synching all accounts and snapshots completed.");
+    println!("Synching all accounts and snapshots completed. \n");
     exit(0);
 }
 
