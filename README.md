@@ -1,17 +1,16 @@
 ## fi
-Cli for personal finance
 
+Cli for personal finance
 
 ```
 $ fi pull
 ```
 
-
+![ahaha](./assets/pull.gif)
 
 ```
 $ fi history [--currency | -c] <currency>
 ```
-
 
 ```
 $ fi sum [--currency | -c] <currency>
@@ -41,11 +40,11 @@ SUBCOMMANDS:
 ```
 
 If you:
+
 - feel like keeping track of your personal finances in Notion
 - are weird enough that you want to use cli to view the data
 - don't mind setting up free Postgres DB on Heroku
-you can use it too.
-
+  you can use it too.
 
 I am hosting "Notion API Worker" myself using Cloudflare, on order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
 This is a neat tool that allows you to access your Notion content, created by [these nice people](https://github.com/splitbee/notion-api-worker)
