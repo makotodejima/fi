@@ -5,20 +5,22 @@ Cli for personal finance
 ```
 $ fi pull
 ```
-
-![ahaha](./assets/pull.gif)
+Pulling data from Notion tables
 
 ```
 $ fi history [--currency | -c] <currency>
 ```
+![fi history](./assets/history_500.gif)
 
 ```
 $ fi sum [--currency | -c] <currency>
 ```
+![fi sum](./assets/sum.png)
 
 ```
 $ fi networth [--currency | -c] <currency>
 ```
+![fi networth](./assets/networth.png)
 
 …and more.
 
