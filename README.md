@@ -56,6 +56,7 @@ then you can use it, too.
 
 
 I am hosting "Notion API Worker" myself using Cloudflare, in order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
+If your notion page/table is public, you can also use this endpoint to query your data.
 
 This is a neat tool that allows you to access your Notion content, created by [these nice people](https://github.com/splitbee/notion-api-worker)
 
