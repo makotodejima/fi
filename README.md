@@ -1,30 +1,33 @@
-## fi
+# fi
 
 Cli for personal finance
 
 ![fi history](./assets/history.gif)
 
+
+### Usage
+
+Pull data from Notion tables
 ```
 $ fi pull
 ```
-Pulling data from Notion tables
 
+Show history for given currency
 ```
 $ fi history [--currency | -c] <currency>
 ```
-blah blah
 
+Show latest for given currency accounts
 ```
 $ fi sum [--currency | -c] <currency>
 ```
-ayya ya
 
+Show sum of all accounts converted to given currency
 ```
 $ fi networth [--currency | -c] <currency>
 ```
 
-
-…and more.
+and some more…
 
 ```
 USAGE:
@@ -50,6 +53,7 @@ If you:
 - don't mind setting up free Postgres DB on Heroku
   you can use it too.
 
-I am hosting "Notion API Worker" myself using Cloudflare, on order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
+I am hosting "Notion API Worker" myself using Cloudflare, in order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
 This is a neat tool that allows you to access your Notion content, created by [these nice people](https://github.com/splitbee/notion-api-worker)
+
 See the [documentation](https://github.com/splitbee/notion-api-worker) for how to set the token for private pages. For public pages there's no need for authorization.
