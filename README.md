@@ -55,9 +55,9 @@ If you:
 then you can use it, too.
 
 
-I am hosting "Notion API Worker" myself using Cloudflare, in order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
+I am hosting "Notion API Worker" myself using Cloudflare in order to access Notion table data from cli. (https://notion-api.mkd.workers.dev).
 If your notion page/table is public, you can also use this endpoint to query your data.
 
 This is a neat tool that allows you to access your Notion content, created by [these nice people](https://github.com/splitbee/notion-api-worker)
 
-See the [documentation](https://github.com/splitbee/notion-api-worker) for how to set the token for private pages. For public pages there's no need for authorization.
+See the [documentation](https://github.com/splitbee/notion-api-worker#authentication-for-private-pages) for how to set the token for private pages. For public pages there's no need for authorization.
