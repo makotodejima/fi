@@ -3,6 +3,14 @@ name = "fi"
 version = "0.1.0"
 authors = ["Makoto Dejima <makotodejima@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "A command line tool for personal finance"
+readme = "README.md"
+homepage = "https://github.com/makotodejima/fi"
+repository = "https://github.com/makotodejima/fi"
+keywords = ["cli", "finance"]
+categories = ["command-line-utilities"]
+exclude = ["assets/*"]
 
 [dependencies]
 chrono = "0.4"
