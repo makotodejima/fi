@@ -2,7 +2,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name = "pfi",
+    name = "fi",
     after_help = "You can also run `fi SUBCOMMAND -h` to get more information about that subcommand."
 )]
 pub enum Cli {
