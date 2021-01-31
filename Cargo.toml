@@ -1,5 +1,5 @@
 [package]
-name = "fi"
+name = "fi-cli"
 version = "0.1.0"
 authors = ["Makoto Dejima <makotodejima@gmail.com>"]
 edition = "2018"
